@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>JSXGraph example preview</title>
+<link rel="stylesheet" href="../distrib/jsxgraph.css" />
+<script>
+  // cdnjs's MathJax mirror only ships the combined bundle files (tex-mml-chtml.js
+  // etc.), not the individual input/tex/extensions/*.js component files that
+  // `loader.load` below needs to fetch on demand -- those requests 404 there and
+  // break MathJax's startup promise, so nothing ever gets typeset. jsdelivr
+  // mirrors the full npm package (all component files included), so that's what
+  // both <script> tags below point at.
+  MathJax = {
+    loader: {
+      load: ['[tex]/color', '[tex]/textmacros']
+    },
+    tex: {
+      packages: { '[+]': ['color', 'textmacros'] },
+      // inlineMath: [['$', '$'], ['\\(', '\\)']],
+      // displayMath: [ ['$$','$$'], ['\\[','\\]'] ],
+      processEscapes: true,
+      processEnvironments: true,
+      tags: 'ams',
+    }
+  };
+</script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script> -->
+<!-- SVG output, not CHTML: CHTML draws math with MathJax's web font, and if that font
+     doesn't apply for a given glyph in a given browser it can fall back to native/system
+     accent positioning and misplace combining accents like \vec's arrow. SVG output draws
+     every glyph (including accents) as its own vector path, so it can't be affected by
+     font substitution. -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-mml-svg.js"></script>
+<script src="../distrib/jsxgraphcore.js"></script>
+<style>
+  html, body { margin: 0; padding: 16px; font-family: sans-serif; }
+  .jxgbox { width: 700px; height: 700px; margin: 0 auto; }
+  #picker { max-width: 700px; margin: 0 auto 12px; }
+</style>
+</head>
+<body>
+
+<div id="picker">
+  <label for="ex">Example: </label>
+  <select id="ex"></select>
+</div>
+<div id="board" class="jxgbox"></div>
+
+<script>
+  // Local list of examples available in MYexamples (kept in sync manually).
+  var examples = [
+    "103/jsx_1_2_function_graph",
+    "103/jsx_1_5_arc_graph",
+    "103/jsx_2_1_linear_graph",
+    "103/jsx_3_1_quadratic_basic",
+    "103/jsx_3_3_vertex_form",
+    "103/jsx_5_2_exp_fun",
+    "103/jsx_7_1_hor_shift",
+    "103/jsx_7_1_vert_shift",
+    "103/jsx_7_2_hor_scal",
+    "103/jsx_7_2_vert_scal",
+    "103/jsx_8_3_sin_cos",
+    "215/jsx_1_1_lin_sys",
+    "215/jsx_1_3_lin_com",
+    "215/jsx_1_3_par",
+    "215/jsx_1_3_scal",
+    "215/jsx_1_3_vec",
+    "215/jsx_1_3_vec_par",
+    "215/jsx_1_4_lin_trans",
+    "215/jsx_1_4_mvp",
+    "215/jsx_1_4_mvp_lin_trans",
+    "215/jsx_4_1_unit_disk",
+    "215/jsx_1_7_lin_indep",
+    "215/jsx_4_2_null_col",
+    "215/jsx_4_3_row_col"
+  ];
+
+  var params = new URLSearchParams(location.search);
+  var current = params.get("ex") || "103/jsx_3_3_vertex_form";
+
+  var select = document.getElementById("ex");
+  examples.forEach(function (ex) {
+    var opt = document.createElement("option");
+    opt.value = ex;
+    opt.textContent = ex;
+    if (ex === current) opt.selected = true;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", function () {
+    location.search = "?ex=" + encodeURIComponent(select.value);
+  });
+
+  // Each example script does JXG.JSXGraph.initBoard('<basename>_fig', ...),
+  // so give the div the id it expects, then load the script.
+  var basename = current.split("/").pop();
+  document.getElementById("board").id = basename + "_fig";
+
+  var script = document.createElement("script");
+  script.src = current + ".js";
+  document.body.appendChild(script);
+</script>
+
+</body>
+</html>
