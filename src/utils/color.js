@@ -41,7 +41,6 @@
 
 import JXG from "../jxg.js";
 import Type from "./type.js";
-import Mat from "../math/math.js";
 
 // private constants and helper functions
 
@@ -196,8 +195,8 @@ var simpleColors = {
     // array of color definition objects
     colorDefs = [
         {
-            re: /^\s*rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([\d.]{1,3})\s*\)\s*$/,
-            example: ["rgba(123, 234, 45, 0.5)", "rgba(255,234,245,1.0)"],
+            re: /^\s*rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([\d.]+%?)\s*\)\s*$/,
+            example: ["rgba(123, 234, 45, 0.5)", "rgba(255,234,245,1.0)", "rgba(10, 20, 30, 0.25)"],
             process: function (bits) {
                 return [parseInt(bits[1], 10), parseInt(bits[2], 10), parseInt(bits[3], 10)];
             }
@@ -365,9 +364,11 @@ JXG.rgb2hex = function (color, ag, ab) {
     var r, g, b;
 
     r = JXG.rgbParser(color, ag, ab);
-    g = r[1];
-    b = r[2];
-    r = r[0];
+    // Round and clamp each channel, so a computed value like 127.5
+    // still gives two hex digits
+    g = Math.round(Math.min(Math.max(r[1], 0), 255));
+    b = Math.round(Math.min(Math.max(r[2], 0), 255));
+    r = Math.round(Math.min(Math.max(r[0], 0), 255));
     r = r.toString(16);
     g = g.toString(16);
     b = b.toString(16);
@@ -429,13 +430,19 @@ JXG.hsv2rgb = function (H, S, V) {
     H = ((H % 360.0) + 360.0) % 360;
 
     if (S === 0) {
-        if (isNaN(H) || H < Mat.eps) {
-            R = V;
-            G = V;
-            B = V;
-        } else {
-            return "#ffffff";
-        }
+        // Without saturation the hue does not matter: the result is a shade of gray.
+        R = V;
+        G = V;
+        B = V;
+
+        // // Old code:
+        // if (isNaN(H) || H < Mat.eps) {
+        //     R = V;
+        //     G = V;
+        //     B = V;
+        // } else {
+        //     return "#ffffff";
+        // }
     } else {
         if (H >= 360) {
             hTemp = 0.0;

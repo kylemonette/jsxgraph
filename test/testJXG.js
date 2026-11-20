@@ -201,6 +201,35 @@ describe("Test JXG util functions", function () {
         expect(JXG.trimNumber('0')).toEqual('0');
     });
 
+    it("hsv2rgb with zero saturation", function () {
+        // Gray for any hue, as for a tiny saturation
+        expect(JXG.hsv2rgb(0, 0, 0.5)).toEqual('#808080');
+        expect(JXG.hsv2rgb(200, 0, 0.5)).toEqual('#808080');
+        expect(JXG.hsv2rgb(200, 0.0001, 0.5)).toEqual('#7f7f80');
+        expect(JXG.hsv2rgb(120, 0, 0)).toEqual('#000000');
+        expect(JXG.hsv2rgb(359, 0, 1)).toEqual('#ffffff');
+    });
+
+    it("rgbParser with rgba alpha of any precision", function () {
+        expect(JXG.rgbParser('rgba(255, 0, 0, 0.5)')).toEqual([255, 0, 0]);
+        expect(JXG.rgbParser('rgba(255, 0, 0, 0.25)')).toEqual([255, 0, 0]);
+        expect(JXG.rgbParser('rgba(10, 20, 30, 0.125)')).toEqual([10, 20, 30]);
+        expect(JXG.rgbParser('rgba(10, 20, 30, 50%)')).toEqual([10, 20, 30]);
+        expect(JXG.rgb2hex('rgba(10, 20, 30, 0.75)')).toEqual('#0a141e');
+        expect(JXG.rgb2bw('rgba(255, 255, 255, 0.25)')).toEqual('#FFFFFF');
+    });
+
+    it("rgb2hex with fractional or out of range channels", function () {
+        // Computed channels give two hex digits each, not '#7f.84000'
+        expect(JXG.rgb2hex(127.5, 64, 0)).toEqual('#804000');
+        expect(JXG.rgb2hex([200.4, 10, 2.5])).toEqual('#c80a03');
+        // Channels outside 0 to 255 are clamped like CSS rgb() does
+        expect(JXG.rgb2hex(256, -1, 0)).toEqual('#ff0000');
+        // Whole channels are unchanged
+        expect(JXG.rgb2hex(255, 0, 15)).toEqual('#ff000f');
+        expect(JXG.rgb2hex([0.5, 0.25, 1])).toEqual('#8040ff');
+    });
+
 });
 
 /*
